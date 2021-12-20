@@ -101,7 +101,21 @@ getCourses();
 
 //document update first
 async function updateCourse(id){
-
+    const result = await Course.update({ _id: id }, {
+        $set: {
+            author: 'Chester',
+            isPublished: false
+        }
+    })
+    console.log(result)
 };
 
-updateCourse('61c02d6e1457bd2b4c077f9e');
+//updateCourse('61c02d6e1457bd2b4c077f9e');
+
+//document update first
+async function removeCourse(id){
+    const result = await Course.deleteOne({ _id: id });
+    console.log(result)
+};
+
+removeCourse('61c02d6e1457bd2b4c077f9e');
