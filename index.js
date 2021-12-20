@@ -7,11 +7,36 @@ mongoose.connect('mongodb://localhost/playground')
 
 //create schema
 const courseSchema = new mongoose.Schema({
-    name: String,
+    name: { type: String, 
+        required: true,
+        minlength: 5,
+        maxlength: 255
+        //match: /pattern/
+    },
+    category: { 
+        type: String,
+        enum: [ 'web', 'mobile', 'network' ],
+        required: true, 
+        lowercase: true,
+    },
     author: String,
-    tags: [ String ],
+    tags: {
+        type: Array,
+        validate: {
+            validator: function(v){ return v && v.length > 0; }, 
+            message: 'A course should have at least 1 tag.'
+        },
+    },
     date: { type: Date, default: Date.now },
-    isPublished: Boolean
+    isPublished: Boolean,
+    price: { 
+        type: Number, 
+        min: 10,
+        max: 200,
+        required: function(){ return this.isPublished },
+        get: v => Math.round(v),
+        set: v => Math.round(v)
+    }
 });
 
 //create model
@@ -19,15 +44,24 @@ const Course = mongoose.model('Course', courseSchema);
 
 async function createCourse(){
     const course = new Course({
-        name: 'Angular Course',
+        name: 'NewCourse1',
         author: 'Mosh',
-        tags: ['javscript', 'frontend'],
-        isPublished: true
+        category: 'Web',
+        tags: ['frontend'],
+        isPublished: true,
+        price: 10.5
     });
 
-    const result = await course.save();
-    console.log(result);
+    try{
+        const result = await course.save();
+        console.log(result);
+    }
+    catch(ex){
+        for (error in ex.errors) console.log(ex.errors[error].properties.message);
+    }
 }
+
+createCourse();
 
 //getting courses - querying from database
 async function getCourses(){
@@ -69,7 +103,7 @@ async function getCourses(){
     console.log(courses);
 }
 
-getCourses();
+// getCourses();
 
 //sql operator shortcuts
     // eq (equal)
@@ -118,4 +152,4 @@ async function removeCourse(id){
     console.log(result)
 };
 
-removeCourse('61c02d6e1457bd2b4c077f9e');
+// removeCourse('61c02d6e1457bd2b4c077f9e');
